@@ -113,10 +113,9 @@ somente quando o campo estiver preenchido.
 
 ## Volume da voz
 
-No topo da página há um **controle de volume** para a voz do chamado. Como o mesmo PC
-costuma tocar música pela caixa, a voz vem ajustada em **50%** por padrão; arraste o
-controle para deixá-la mais alta ou mais baixa em relação à música. O ajuste é lembrado
-no próprio navegador.
+No topo da página há um **controle de volume** para a voz do chamado. O padrão é **95%**;
+arraste o controle para deixá-la mais alta ou mais baixa em relação à música que toca no
+mesmo PC. O ajuste é lembrado no próprio navegador.
 
 > Observação técnica: o navegador controla **apenas o volume da própria voz** (0–100%),
 > não o da música (que toca em outro aplicativo). Por isso o ajuste é manual — equilibre

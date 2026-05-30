@@ -532,6 +532,46 @@
       border: 0;
     }
 
+    /* ---------- Ajustes para celular ---------- */
+    @media (max-width: 560px) {
+      .container { padding: 0 var(--s3) var(--s6); }
+      .barra-inner { padding: var(--s3) var(--s3) var(--s2); }
+
+      /* Cabeçalho mais compacto para sobrar tela (barra é fixa) */
+      .marca .selo { width: 34px; height: 34px; }
+      .marca p { font-size: 0.8rem; }
+
+      .busca { margin-top: var(--s3); }
+      .busca input { height: 48px; }
+
+      .volume { margin-top: var(--s2); gap: var(--s2); }
+
+      .secao-titulo { margin: var(--s5) 0 var(--s2); }
+
+      /* Cartões em coluna única, bem largos e confortáveis ao toque */
+      .grade { grid-template-columns: 1fr; gap: var(--s2); }
+      .cartao {
+        min-height: 0;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--s4);
+        gap: var(--s3);
+      }
+      .cartao .nome { flex: 1; }
+      .cartao .funcao { align-self: center; flex-shrink: 0; }
+
+      /* Modal aproveita melhor a tela do celular */
+      .overlay { padding: var(--s3); align-items: flex-end; }
+      .modal { padding: var(--s5) var(--s4) var(--s4); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+      .btn-mensagem { padding: var(--s4) var(--s3); }
+    }
+
+    @media (max-width: 360px) {
+      .marca h1 { font-size: 1.15rem; }
+      .chip { padding: 0 var(--s3); font-size: 0.9rem; }
+    }
+
     /* ---------- Movimento reduzido ---------- */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -589,8 +629,8 @@
           </svg>
         </span>
         <label for="volume" class="sr-only">Volume da voz do chamado</label>
-        <input id="volume" type="range" min="0" max="100" step="5" value="50" />
-        <span class="valor" id="volume-valor">50%</span>
+        <input id="volume" type="range" min="0" max="100" step="5" value="95" />
+        <span class="valor" id="volume-valor">95%</span>
       </div>
     </div>
   </div>
@@ -666,9 +706,9 @@
     }
 
     /* ---- Parâmetros da voz ----
-       volume: 0 a 1. Padrão 0.5 (mais baixo) porque o mesmo PC toca música.
-       Ajustável pelo slider e lembrado entre sessões. */
-    const PARAMS_VOZ = { rate: 0.95, pitch: 1, volume: 0.5 };
+       volume: 0 a 1. Padrão 0.95. Ajustável pelo slider e lembrado entre sessões. */
+    const PARAMS_VOZ = { rate: 0.95, pitch: 1, volume: 0.95 };
+    const VOLUME_PADRAO = 95;
 
     /* ---- Estado ---- */
     let filtroAtivo = "Todas";
@@ -941,15 +981,15 @@
       elVolume.value = p;
       elVolume.style.setProperty("--preench", p + "%");
       elVolumeValor.textContent = p + "%";
-      try { localStorage.setItem("volumeVoz", String(p)); } catch (e) {}
+      try { localStorage.setItem("volumeVozV2", String(p)); } catch (e) {}
     }
 
     elVolume.addEventListener("input", () => aplicarVolume(Number(elVolume.value)));
 
-    // Restaura o volume salvo (ou usa o padrão de 50%).
-    let volumeSalvo = 50;
+    // Restaura o volume salvo (ou usa o padrão de 95%).
+    let volumeSalvo = VOLUME_PADRAO;
     try {
-      const v = localStorage.getItem("volumeVoz");
+      const v = localStorage.getItem("volumeVozV2");
       if (v !== null) volumeSalvo = Number(v);
     } catch (e) {}
     aplicarVolume(volumeSalvo);
