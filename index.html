@@ -183,6 +183,60 @@
     .busca .limpar.visivel { display: grid; }
     .busca .limpar:hover { color: var(--bege); background: rgba(255, 255, 255, 0.06); }
 
+    /* ---------- Controle de volume da voz ---------- */
+    .volume {
+      display: flex;
+      align-items: center;
+      gap: var(--s3);
+      margin-top: var(--s3);
+      padding: 0 var(--s2);
+    }
+    .volume .ic-vol { color: var(--texto-fraco); flex-shrink: 0; display: grid; }
+    .volume input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 6px;
+      border-radius: var(--r-full);
+      background: linear-gradient(
+        to right,
+        var(--bronze) 0%,
+        var(--bronze) var(--preench, 50%),
+        var(--grafite-3) var(--preench, 50%),
+        var(--grafite-3) 100%
+      );
+      outline: none;
+      cursor: pointer;
+    }
+    .volume input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bege);
+      border: 2px solid var(--bronze);
+      box-shadow: var(--sombra-sm);
+      cursor: pointer;
+    }
+    .volume input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--bege);
+      border: 2px solid var(--bronze);
+      cursor: pointer;
+    }
+    .volume .valor {
+      flex-shrink: 0;
+      min-width: 42px;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--texto-suave);
+      font-variant-numeric: tabular-nums;
+    }
+
     /* ---------- Seções ---------- */
     .secao-titulo {
       font-family: var(--fonte-corpo);
@@ -524,6 +578,20 @@
           </svg>
         </button>
       </div>
+
+      <!-- Volume da voz (ajuste conforme o volume da música) -->
+      <div class="volume">
+        <span class="ic-vol" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4.7 6.5 8H3v8h3.5L11 19.3z" />
+            <path d="M16 9a4 4 0 0 1 0 6" />
+          </svg>
+        </span>
+        <label for="volume" class="sr-only">Volume da voz do chamado</label>
+        <input id="volume" type="range" min="0" max="100" step="5" value="50" />
+        <span class="valor" id="volume-valor">50%</span>
+      </div>
     </div>
   </div>
 
@@ -555,7 +623,7 @@
             <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
           </svg>
         </span>
-        <span class="txt">Comparecer à recepção<small>por favor</small></span>
+        <span class="txt">Comparecer à recepção</span>
       </button>
 
       <button class="btn-mensagem" data-tipo="cliente">
@@ -597,8 +665,10 @@
       ];
     }
 
-    /* ---- Parâmetros da voz ---- */
-    const PARAMS_VOZ = { rate: 0.95, pitch: 1, volume: 1 };
+    /* ---- Parâmetros da voz ----
+       volume: 0 a 1. Padrão 0.5 (mais baixo) porque o mesmo PC toca música.
+       Ajustável pelo slider e lembrado entre sessões. */
+    const PARAMS_VOZ = { rate: 0.95, pitch: 1, volume: 0.5 };
 
     /* ---- Estado ---- */
     let filtroAtivo = "Todas";
@@ -612,6 +682,8 @@
     const elGrade = document.getElementById("grade");
     const elBusca = document.getElementById("busca");
     const elLimpar = document.getElementById("limpar-busca");
+    const elVolume = document.getElementById("volume");
+    const elVolumeValor = document.getElementById("volume-valor");
     const elOverlay = document.getElementById("overlay");
     const elModalNome = document.getElementById("modal-nome");
     const elModalFuncao = document.getElementById("modal-funcao");
@@ -643,7 +715,7 @@
       if (tipo === "cliente") {
         return nome + ", sua cliente chegou e aguarda na recepção.";
       }
-      return nome + ", comparecer à recepção, por favor.";
+      return nome + ", comparecer à recepção.";
     }
 
     // Mostra/oculta as ondas sonoras dentro do botão que está falando.
@@ -861,6 +933,26 @@
       renderGrade();
       elBusca.focus();
     });
+
+    /* ---- Controle de volume da voz ---- */
+    function aplicarVolume(percent) {
+      const p = Math.max(0, Math.min(100, percent));
+      PARAMS_VOZ.volume = p / 100;
+      elVolume.value = p;
+      elVolume.style.setProperty("--preench", p + "%");
+      elVolumeValor.textContent = p + "%";
+      try { localStorage.setItem("volumeVoz", String(p)); } catch (e) {}
+    }
+
+    elVolume.addEventListener("input", () => aplicarVolume(Number(elVolume.value)));
+
+    // Restaura o volume salvo (ou usa o padrão de 50%).
+    let volumeSalvo = 50;
+    try {
+      const v = localStorage.getItem("volumeVoz");
+      if (v !== null) volumeSalvo = Number(v);
+    } catch (e) {}
+    aplicarVolume(volumeSalvo);
 
     /* ---- Início ---- */
     renderFiltros();

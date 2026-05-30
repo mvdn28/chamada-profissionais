@@ -108,8 +108,20 @@ somente quando o campo estiver preenchido.
 
 ## Mensagens atuais
 
-1. **"[Nome], comparecer à recepção, por favor."**
+1. **"[Nome], comparecer à recepção."**
 2. **"[Nome], sua cliente chegou e aguarda na recepção."**
+
+## Volume da voz
+
+No topo da página há um **controle de volume** para a voz do chamado. Como o mesmo PC
+costuma tocar música pela caixa, a voz vem ajustada em **50%** por padrão; arraste o
+controle para deixá-la mais alta ou mais baixa em relação à música. O ajuste é lembrado
+no próprio navegador.
+
+> Observação técnica: o navegador controla **apenas o volume da própria voz** (0–100%),
+> não o da música (que toca em outro aplicativo). Por isso o ajuste é manual — equilibre
+> conforme o volume da música no momento. Evite deixar muito baixo, ou o chamado não será
+> ouvido sobre a música.
 
 ## Compatibilidade
 
