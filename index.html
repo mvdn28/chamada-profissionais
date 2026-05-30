@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chamada de Profissionais</title>
+
+  <!-- Google Fonts (com fallback do sistema caso esteja offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      /* Paleta sóbria — preto / grafite / bege, acento bronze fosco */
+      --preto: #141109;
+      --grafite: #221f1a;
+      --grafite-2: #2c2823;
+      --grafite-3: #38332c;
+      --linha: rgba(176, 141, 87, 0.22);
+      --linha-forte: rgba(176, 141, 87, 0.5);
+
+      --bege: #f4ecdd;
+      --texto: #efe7d7;
+      --texto-suave: #b9ad97;
+      --texto-fraco: #8a7f6c;
+
+      --bronze: #b08d57;
+      --bronze-claro: #d0ad77;
+      --bronze-escuro: #8c6c3d;
+
+      --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --sombra-md: 0 8px 24px rgba(0, 0, 0, 0.38);
+      --sombra-lg: 0 20px 56px rgba(0, 0, 0, 0.55);
+
+      /* Escala de espaçamento */
+      --s1: 4px;
+      --s2: 8px;
+      --s3: 12px;
+      --s4: 16px;
+      --s5: 24px;
+      --s6: 32px;
+      --s7: 48px;
+
+      --r-sm: 12px;
+      --r-md: 18px;
+      --r-lg: 24px;
+      --r-full: 999px;
+
+      /* Escala de z-index */
+      --z-barra: 20;
+      --z-overlay: 50;
+
+      --fonte-titulo: "Playfair Display", Georgia, "Times New Roman", serif;
+      --fonte-corpo: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--fonte-corpo);
+      background:
+        radial-gradient(120% 80% at 50% -10%, #2b2720 0%, var(--preto) 60%) fixed,
+        var(--preto);
+      color: var(--texto);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 var(--s4) var(--s7);
+    }
+
+    /* ---------- Barra superior fixa ---------- */
+    .barra {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-barra);
+      background: linear-gradient(180deg, rgba(20, 17, 9, 0.96), rgba(20, 17, 9, 0.82));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--linha);
+    }
+
+    .barra-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--s4) var(--s4) var(--s3);
+    }
+
+    .marca {
+      display: flex;
+      align-items: center;
+      gap: var(--s3);
+    }
+
+    .marca .selo {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--linha-forte);
+      display: grid;
+      place-items: center;
+      color: var(--bronze-claro);
+      background: rgba(176, 141, 87, 0.08);
+    }
+
+    .marca h1 {
+      font-family: var(--fonte-titulo);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      font-size: clamp(1.25rem, 3.6vw, 1.7rem);
+      margin: 0;
+      color: var(--bege);
+      line-height: 1.1;
+    }
+
+    .marca p {
+      margin: 2px 0 0;
+      color: var(--texto-suave);
+      font-size: 0.85rem;
+    }
+
+    /* ---------- Busca ---------- */
+    .busca {
+      position: relative;
+      margin-top: var(--s4);
+    }
+
+    .busca svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--texto-fraco);
+      pointer-events: none;
+    }
+
+    .busca input {
+      width: 100%;
+      height: 52px;
+      padding: 0 44px 0 46px;
+      border-radius: var(--r-full);
+      border: 1px solid var(--linha);
+      background: var(--grafite);
+      color: var(--texto);
+      font-family: var(--fonte-corpo);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .busca input::placeholder { color: var(--texto-fraco); }
+
+    .busca input:focus {
+      border-color: var(--bronze);
+      box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.22);
+    }
+
+    .busca .limpar {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      color: var(--texto-fraco);
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      place-items: center;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .busca .limpar.visivel { display: grid; }
+    .busca .limpar:hover { color: var(--bege); background: rgba(255, 255, 255, 0.06); }
+
+    /* ---------- Seções ---------- */
+    .secao-titulo {
+      font-family: var(--fonte-corpo);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--bronze-claro);
+      margin: var(--s6) 0 var(--s3);
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+    }
+    .secao-titulo .passo {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bronze);
+      color: var(--preto);
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+
+    /* ---------- Chips de filtro ---------- */
+    .filtros {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s2);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s2);
+      border: 1px solid var(--linha-forte);
+      background: transparent;
+      color: var(--texto-suave);
+      padding: 0 var(--s4);
+      height: 44px;
+      border-radius: var(--r-full);
+      font-family: var(--fonte-corpo);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .chip:hover { border-color: var(--bronze-claro); color: var(--bege); }
+    .chip.ativo {
+      background: var(--bronze);
+      border-color: var(--bronze);
+      color: var(--preto);
+      font-weight: 600;
+    }
+    .chip .contagem {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 1px 8px;
+      border-radius: var(--r-full);
+      background: rgba(255, 255, 255, 0.1);
+      color: inherit;
+    }
+    .chip.ativo .contagem { background: rgba(20, 17, 9, 0.22); }
+
+    /* ---------- Grade de profissionais ---------- */
+    .grade {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--s3);
+    }
+
+    .cartao {
+      position: relative;
+      background: linear-gradient(160deg, var(--grafite-3), var(--grafite));
+      border: 1px solid var(--linha);
+      border-radius: var(--r-md);
+      padding: var(--s5) var(--s4);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.16s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: var(--sombra-sm);
+      min-height: 108px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--s3);
+      font-family: var(--fonte-corpo);
+      color: inherit;
+    }
+    .cartao:hover {
+      transform: translateY(-3px);
+      border-color: var(--linha-forte);
+      box-shadow: var(--sombra-md);
+    }
+    .cartao:active { transform: translateY(-1px); }
+
+    .cartao .nome {
+      font-family: var(--fonte-titulo);
+      font-size: clamp(1.1rem, 1rem + 0.6vw, 1.34rem);
+      font-weight: 500;
+      color: var(--bege);
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .cartao .funcao {
+      align-self: flex-start;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--bronze-claro);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: var(--r-full);
+      border: 1px solid var(--linha);
+      background: rgba(176, 141, 87, 0.08);
+    }
+
+    .vazio {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: var(--s7) var(--s4);
+      color: var(--texto-suave);
+      border: 1px dashed var(--linha);
+      border-radius: var(--r-md);
+    }
+    .vazio strong { color: var(--bege); font-weight: 600; }
+
+    /* ---------- Modal (Passo 3) ---------- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-overlay);
+      background: rgba(8, 7, 4, 0.74);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--s4);
+    }
+    .overlay.aberto { display: flex; }
+
+    .modal {
+      background: linear-gradient(160deg, var(--grafite-3), var(--grafite));
+      border: 1px solid var(--linha-forte);
+      border-radius: var(--r-lg);
+      padding: var(--s6) var(--s5) var(--s5);
+      max-width: 500px;
+      width: 100%;
+      box-shadow: var(--sombra-lg);
+      text-align: center;
+      animation: entrar 0.22s ease;
+    }
+    @keyframes entrar {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .modal .modal-funcao {
+      color: var(--bronze-claro);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: var(--s2);
+    }
+    .modal h2 {
+      font-family: var(--fonte-titulo);
+      font-weight: 500;
+      font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+      margin: 0 0 var(--s5);
+      color: var(--bege);
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .btn-mensagem {
+      display: flex;
+      align-items: center;
+      gap: var(--s4);
+      width: 100%;
+      border: 1px solid var(--linha-forte);
+      background: var(--grafite-2);
+      color: var(--texto);
+      padding: var(--s4) var(--s4);
+      border-radius: var(--r-md);
+      font-family: var(--fonte-corpo);
+      font-size: 1rem;
+      line-height: 1.35;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: var(--s3);
+      min-height: 64px;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.12s ease;
+    }
+    .btn-mensagem:hover { border-color: var(--bronze-claro); background: var(--grafite-3); }
+    .btn-mensagem:active { transform: scale(0.99); }
+
+    .btn-mensagem .ic {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(176, 141, 87, 0.14);
+      color: var(--bronze-claro);
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+    .btn-mensagem .txt { font-weight: 500; }
+    .btn-mensagem .txt small {
+      display: block;
+      color: var(--texto-fraco);
+      font-size: 0.78rem;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .btn-mensagem.falando {
+      background: var(--bronze);
+      border-color: var(--bronze);
+      color: var(--preto);
+    }
+    .btn-mensagem.falando .txt small { color: rgba(20, 17, 9, 0.7); }
+    .btn-mensagem.falando .ic { background: rgba(20, 17, 9, 0.18); color: var(--preto); }
+
+    /* Ondas sonoras animadas (feedback de fala) */
+    .ondas { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
+    .ondas span {
+      width: 3px;
+      height: 6px;
+      background: currentColor;
+      border-radius: 2px;
+      animation: onda 0.9s ease-in-out infinite;
+    }
+    .ondas span:nth-child(2) { animation-delay: 0.15s; }
+    .ondas span:nth-child(3) { animation-delay: 0.3s; }
+    .ondas span:nth-child(4) { animation-delay: 0.45s; }
+    @keyframes onda {
+      0%, 100% { height: 5px; }
+      50% { height: 18px; }
+    }
+
+    .btn-fechar {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--texto-suave);
+      font-family: var(--fonte-corpo);
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: var(--s2);
+      padding: var(--s3);
+      width: 100%;
+      border-radius: var(--r-sm);
+      min-height: 48px;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .btn-fechar:hover { color: var(--bege); background: rgba(255, 255, 255, 0.05); }
+
+    .aviso-voz {
+      display: none;
+      margin: var(--s4) 0 0;
+      color: #e3b56a;
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+    .aviso-voz.visivel { display: block; }
+
+    footer {
+      text-align: center;
+      margin-top: var(--s7);
+      color: var(--texto-fraco);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ---------- Acessibilidade: foco visível ---------- */
+    :focus-visible {
+      outline: 2px solid var(--bronze-claro);
+      outline-offset: 3px;
+      border-radius: var(--r-sm);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ---------- Movimento reduzido ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+      .ondas span { height: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra superior -->
+  <div class="barra">
+    <div class="barra-inner">
+      <div class="marca">
+        <span class="selo" aria-hidden="true">
+          <!-- Ícone: sino de chamada (Lucide bell) -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+            <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+          </svg>
+        </span>
+        <div>
+          <h1>Chamada de Profissionais</h1>
+          <p>Filtre, escolha a profissional e dispare o chamado.</p>
+        </div>
+      </div>
+
+      <!-- Busca por nome -->
+      <div class="busca">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <label for="busca" class="sr-only">Buscar profissional pelo nome</label>
+        <input id="busca" type="search" autocomplete="off" placeholder="Buscar pelo nome..." />
+        <button class="limpar" id="limpar-busca" type="button" aria-label="Limpar busca">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Passo 1 -->
+    <div class="secao-titulo"><span class="passo">1</span> Filtrar por função</div>
+    <div class="filtros" id="filtros" role="group" aria-label="Filtrar por função"></div>
+
+    <!-- Passo 2 -->
+    <div class="secao-titulo"><span class="passo">2</span> Escolher a profissional</div>
+    <div class="grade" id="grade"></div>
+
+    <footer>
+      Voz sintética do sistema (pt-BR) &middot; o som sai pelo aparelho que dispara o chamado.
+    </footer>
+  </div>
+
+  <!-- Passo 3: Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-nome">
+      <div class="modal-funcao" id="modal-funcao">Função</div>
+      <h2 id="modal-nome">Nome</h2>
+
+      <button class="btn-mensagem" data-tipo="recepcao">
+        <span class="ic" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l18-5v12L3 14v-3z" />
+            <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+          </svg>
+        </span>
+        <span class="txt">Comparecer à recepção<small>por favor</small></span>
+      </button>
+
+      <button class="btn-mensagem" data-tipo="cliente">
+        <span class="ic" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          </svg>
+        </span>
+        <span class="txt">Sua cliente chegou<small>e aguarda na recepção</small></span>
+      </button>
+
+      <p class="aviso-voz" id="aviso-voz">
+        Toque novamente para liberar o áudio neste navegador.
+      </p>
+
+      <button class="btn-fechar" id="btn-fechar" type="button">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Região aria-live para anúncios de status (leitores de tela) -->
+  <div class="sr-only" id="status-voz" aria-live="polite"></div>
+
+  <!-- Lista da equipe (edite em profissionais.js) -->
+  <script src="profissionais.js"></script>
+
+  <script>
+    "use strict";
+
+    /* Fallback caso profissionais.js não seja carregado (ex.: arquivo ausente). */
+    if (typeof PROFISSIONAIS === "undefined") {
+      window.PROFISSIONAIS = [
+        { nome: "Maria", funcao: "Sobrancelha" },
+        { nome: "Ana", funcao: "Cílios" },
+        { nome: "Júlia", funcao: "Manicure" },
+        { nome: "Carla", funcao: "Depilação" },
+      ];
+    }
+
+    /* ---- Parâmetros da voz ---- */
+    const PARAMS_VOZ = { rate: 0.95, pitch: 1, volume: 1 };
+
+    /* ---- Estado ---- */
+    let filtroAtivo = "Todas";
+    let termoBusca = "";
+    let profissionalSelecionada = null;
+    let elementoFoco = null; // para devolver o foco ao fechar o modal
+    let vozPtBr = null;
+
+    /* ---- Elementos ---- */
+    const elFiltros = document.getElementById("filtros");
+    const elGrade = document.getElementById("grade");
+    const elBusca = document.getElementById("busca");
+    const elLimpar = document.getElementById("limpar-busca");
+    const elOverlay = document.getElementById("overlay");
+    const elModalNome = document.getElementById("modal-nome");
+    const elModalFuncao = document.getElementById("modal-funcao");
+    const elAvisoVoz = document.getElementById("aviso-voz");
+    const elBtnFechar = document.getElementById("btn-fechar");
+    const elStatusVoz = document.getElementById("status-voz");
+    const botoesMensagem = Array.from(document.querySelectorAll(".btn-mensagem"));
+
+    /* ============================================================
+       Síntese de voz
+       ============================================================ */
+    const suporteVoz = "speechSynthesis" in window;
+
+    function escolherVoz() {
+      if (!suporteVoz) return;
+      const vozes = window.speechSynthesis.getVoices();
+      vozPtBr =
+        vozes.find((v) => /^pt[-_]?br/i.test(v.lang)) ||
+        vozes.find((v) => /^pt/i.test(v.lang)) ||
+        null;
+    }
+
+    if (suporteVoz) {
+      escolherVoz();
+      window.speechSynthesis.onvoiceschanged = escolherVoz;
+    }
+
+    function montarTexto(nome, tipo) {
+      if (tipo === "cliente") {
+        return nome + ", sua cliente chegou e aguarda na recepção.";
+      }
+      return nome + ", comparecer à recepção, por favor.";
+    }
+
+    // Mostra/oculta as ondas sonoras dentro do botão que está falando.
+    function marcarFalando(botao, ativo) {
+      botoesMensagem.forEach((b) => {
+        b.classList.remove("falando");
+        const ondas = b.querySelector(".ondas");
+        if (ondas) ondas.remove();
+        const ic = b.querySelector(".ic svg");
+        if (ic) ic.style.display = "";
+      });
+      if (ativo && botao) {
+        botao.classList.add("falando");
+        const ic = botao.querySelector(".ic");
+        const svg = ic.querySelector("svg");
+        if (svg) svg.style.display = "none";
+        const ondas = document.createElement("span");
+        ondas.className = "ondas";
+        for (let i = 0; i < 4; i++) ondas.appendChild(document.createElement("span"));
+        ic.appendChild(ondas);
+      }
+    }
+
+    function falar(texto, botao, nome) {
+      if (!suporteVoz) {
+        elAvisoVoz.textContent = "Este navegador não suporta síntese de voz.";
+        elAvisoVoz.classList.add("visivel");
+        return;
+      }
+
+      // Cancela qualquer fala em andamento para não acumular na fila.
+      window.speechSynthesis.cancel();
+
+      marcarFalando(botao, true);
+      elStatusVoz.textContent = "Chamando " + nome + "…";
+
+      const limparFeedback = () => {
+        marcarFalando(botao, false);
+        elStatusVoz.textContent = "";
+      };
+
+      const criarFala = (aoTerminar) => {
+        const u = new SpeechSynthesisUtterance(texto);
+        u.lang = "pt-BR"; // fallback caso não exista voz pt-BR explícita
+        if (vozPtBr) u.voice = vozPtBr;
+        u.rate = PARAMS_VOZ.rate;
+        u.pitch = PARAMS_VOZ.pitch;
+        u.volume = PARAMS_VOZ.volume;
+        u.onend = aoTerminar;
+        u.onerror = aoTerminar; // sempre remove o feedback no fim
+        return u;
+      };
+
+      // Primeira fala -> ao terminar, dispara a segunda (repetição dupla).
+      const primeira = criarFala(() => {
+        const segunda = criarFala(limparFeedback);
+        window.speechSynthesis.speak(segunda);
+      });
+      window.speechSynthesis.speak(primeira);
+    }
+
+    /* ============================================================
+       Renderização
+       ============================================================ */
+    function funcoesDisponiveis() {
+      const set = new Set(PROFISSIONAIS.map((p) => p.funcao));
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
+
+    // Normaliza texto para busca (sem acentos, minúsculo).
+    function normalizar(txt) {
+      return txt
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "");
+    }
+
+    function listaFiltrada() {
+      const termo = normalizar(termoBusca.trim());
+      return PROFISSIONAIS.filter((p) => {
+        const passaFuncao = filtroAtivo === "Todas" || p.funcao === filtroAtivo;
+        const passaBusca = !termo || normalizar(p.nome).includes(termo);
+        return passaFuncao && passaBusca;
+      });
+    }
+
+    function contarFuncao(funcao) {
+      const termo = normalizar(termoBusca.trim());
+      return PROFISSIONAIS.filter((p) => {
+        const passaFuncao = funcao === "Todas" || p.funcao === funcao;
+        const passaBusca = !termo || normalizar(p.nome).includes(termo);
+        return passaFuncao && passaBusca;
+      }).length;
+    }
+
+    function renderFiltros() {
+      elFiltros.innerHTML = "";
+      const opcoes = ["Todas", ...funcoesDisponiveis()];
+      opcoes.forEach((funcao) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip" + (funcao === filtroAtivo ? " ativo" : "");
+        btn.setAttribute("aria-pressed", funcao === filtroAtivo ? "true" : "false");
+
+        const rotulo = document.createElement("span");
+        rotulo.textContent = funcao;
+        btn.appendChild(rotulo);
+
+        const cont = document.createElement("span");
+        cont.className = "contagem";
+        cont.textContent = contarFuncao(funcao);
+        btn.appendChild(cont);
+
+        btn.addEventListener("click", () => {
+          filtroAtivo = funcao;
+          renderFiltros();
+          renderGrade();
+        });
+        elFiltros.appendChild(btn);
+      });
+    }
+
+    function renderGrade() {
+      elGrade.innerHTML = "";
+      const lista = listaFiltrada();
+
+      if (lista.length === 0) {
+        const vazio = document.createElement("div");
+        vazio.className = "vazio";
+        const t = document.createElement("strong");
+        t.textContent = "Nenhuma profissional encontrada.";
+        vazio.appendChild(t);
+        const sub = document.createElement("div");
+        sub.textContent = "Ajuste a busca ou o filtro de função.";
+        sub.style.marginTop = "6px";
+        sub.style.fontSize = "0.9rem";
+        vazio.appendChild(sub);
+        elGrade.appendChild(vazio);
+        return;
+      }
+
+      lista.forEach((p) => {
+        const cartao = document.createElement("button");
+        cartao.type = "button";
+        cartao.className = "cartao";
+        cartao.setAttribute("aria-label", "Chamar " + p.nome + ", " + p.funcao);
+
+        const elNome = document.createElement("span");
+        elNome.className = "nome";
+        elNome.textContent = p.nome;
+
+        const elFuncao = document.createElement("span");
+        elFuncao.className = "funcao";
+        elFuncao.textContent = p.funcao;
+
+        cartao.appendChild(elNome);
+        cartao.appendChild(elFuncao);
+        cartao.addEventListener("click", () => abrirModal(p, cartao));
+        elGrade.appendChild(cartao);
+      });
+    }
+
+    /* ============================================================
+       Modal (Passo 3)
+       ============================================================ */
+    function abrirModal(profissional, origem) {
+      profissionalSelecionada = profissional;
+      elementoFoco = origem || null;
+      elModalNome.textContent = profissional.nome;
+      elModalFuncao.textContent = profissional.funcao;
+      elAvisoVoz.classList.remove("visivel");
+      marcarFalando(null, false);
+      elOverlay.classList.add("aberto");
+      // Move o foco para a primeira opção de mensagem (acessibilidade).
+      botoesMensagem[0].focus();
+    }
+
+    function fecharModal() {
+      elOverlay.classList.remove("aberto");
+      if (suporteVoz) window.speechSynthesis.cancel();
+      marcarFalando(null, false);
+      elStatusVoz.textContent = "";
+      profissionalSelecionada = null;
+      if (elementoFoco) elementoFoco.focus();
+    }
+
+    botoesMensagem.forEach((botao) => {
+      botao.addEventListener("click", () => {
+        if (!profissionalSelecionada) return;
+        const texto = montarTexto(profissionalSelecionada.nome, botao.dataset.tipo);
+        falar(texto, botao, profissionalSelecionada.nome);
+      });
+    });
+
+    elBtnFechar.addEventListener("click", fecharModal);
+    elOverlay.addEventListener("click", (e) => {
+      if (e.target === elOverlay) fecharModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && elOverlay.classList.contains("aberto")) fecharModal();
+    });
+
+    /* ---- Busca ---- */
+    elBusca.addEventListener("input", () => {
+      termoBusca = elBusca.value;
+      elLimpar.classList.toggle("visivel", termoBusca.length > 0);
+      renderFiltros();
+      renderGrade();
+    });
+    elLimpar.addEventListener("click", () => {
+      elBusca.value = "";
+      termoBusca = "";
+      elLimpar.classList.remove("visivel");
+      renderFiltros();
+      renderGrade();
+      elBusca.focus();
+    });
+
+    /* ---- Início ---- */
+    renderFiltros();
+    renderGrade();
+
+    if (!suporteVoz) {
+      elAvisoVoz.textContent = "Atenção: este navegador não suporta síntese de voz.";
+    }
+  </script>
+</body>
+</html>
