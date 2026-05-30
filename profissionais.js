@@ -23,4 +23,5 @@ const PROFISSIONAIS = [
   { nome: "Daniele",            funcao: "Manicure" },
   { nome: "Daiana",              funcao: "Manicure" },
   { nome: "Juliana Rodrigues",          funcao: "Manicure" },
+  { nome: "Gabriela Johanna",          funcao: "Manicure" },
 ];
