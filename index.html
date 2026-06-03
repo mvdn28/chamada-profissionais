@@ -779,6 +779,31 @@
       }
     }
 
+    // Tempo de espera (ms) antes de falar de verdade, para o alto-falante
+    // "acordar" e não engolir a primeira letra do chamado.
+    const ESPERA_ANTES_DE_FALAR = 1000;
+    let timerFala = null;
+
+    // Cancela qualquer fala/espera pendente.
+    function pararFala() {
+      if (timerFala !== null) {
+        clearTimeout(timerFala);
+        timerFala = null;
+      }
+      if (suporteVoz) window.speechSynthesis.cancel();
+    }
+
+    // Aciona a saída de áudio (alto-falante) com uma fala praticamente
+    // inaudível, para que ela já esteja "ligada" quando o chamado começar.
+    function aquecerAudio() {
+      const aquece = new SpeechSynthesisUtterance(".");
+      aquece.lang = "pt-BR";
+      if (vozPtBr) aquece.voice = vozPtBr;
+      aquece.volume = 0.01; // praticamente inaudível
+      aquece.rate = 1;
+      window.speechSynthesis.speak(aquece);
+    }
+
     function falar(texto, botao, nome) {
       if (!suporteVoz) {
         elAvisoVoz.textContent = "Este navegador não suporta síntese de voz.";
@@ -786,9 +811,10 @@
         return;
       }
 
-      // Cancela qualquer fala em andamento para não acumular na fila.
-      window.speechSynthesis.cancel();
+      // Cancela qualquer fala/espera anterior para não acumular.
+      pararFala();
 
+      // Feedback visual imediato (já durante a espera de 1s).
       marcarFalando(botao, true);
       elStatusVoz.textContent = "Chamando " + nome + "…";
 
@@ -809,12 +835,18 @@
         return u;
       };
 
-      // Primeira fala -> ao terminar, dispara a segunda (repetição dupla).
-      const primeira = criarFala(() => {
-        const segunda = criarFala(limparFeedback);
-        window.speechSynthesis.speak(segunda);
-      });
-      window.speechSynthesis.speak(primeira);
+      // 1) Aciona o alto-falante imediatamente.
+      aquecerAudio();
+
+      // 2) Espera ~1s com o áudio já acionado e então fala de verdade (2x).
+      timerFala = setTimeout(() => {
+        timerFala = null;
+        const primeira = criarFala(() => {
+          const segunda = criarFala(limparFeedback);
+          window.speechSynthesis.speak(segunda);
+        });
+        window.speechSynthesis.speak(primeira);
+      }, ESPERA_ANTES_DE_FALAR);
     }
 
     /* ============================================================
@@ -935,7 +967,7 @@
 
     function fecharModal() {
       elOverlay.classList.remove("aberto");
-      if (suporteVoz) window.speechSynthesis.cancel();
+      pararFala();
       marcarFalando(null, false);
       elStatusVoz.textContent = "";
       profissionalSelecionada = null;
