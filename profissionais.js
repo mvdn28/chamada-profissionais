@@ -39,4 +39,5 @@ const PROFISSIONAIS = [
   { nome: "Milena",            funcao: "Recepcionista" },
   { nome: "Maria das Luz",     funcao: "Recepcionista" },
   { nome: "Thamires",          funcao: "Recepcionista" },
+  { nome: "Thaynara",          funcao: "Recepcionista" },
 ];
