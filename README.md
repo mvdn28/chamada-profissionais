@@ -38,6 +38,17 @@ const PROFISSIONAIS = [
 - Os botões de filtro (chips) por função são gerados **automaticamente** a partir
   desta lista — não há uma segunda lista para manter sincronizada.
 
+### Corrigir a pronúncia de um nome
+
+Se a voz pronuncia um nome de forma estranha, adicione o campo opcional **`falar`** com
+a grafia "fonética" — o nome real continua aparecendo na tela; **só a fala muda**:
+
+```js
+{ nome: "Sibelly", funcao: "Manicure", falar: "Cibele" },
+```
+
+Acima, a tela mostra "Sibelly", mas a voz diz "Cibele".
+
 Salve o arquivo e recarregue a página no navegador. (Se `profissionais.js` faltar ou não
 carregar, a página usa uma pequena lista de exemplo embutida como segurança.)
 

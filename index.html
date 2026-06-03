@@ -977,7 +977,9 @@
     botoesMensagem.forEach((botao) => {
       botao.addEventListener("click", () => {
         if (!profissionalSelecionada) return;
-        const texto = montarTexto(profissionalSelecionada.nome, botao.dataset.tipo);
+        // Usa a pronúncia personalizada (campo "falar"), se houver; senão o nome real.
+        const nomeFala = profissionalSelecionada.falar || profissionalSelecionada.nome;
+        const texto = montarTexto(nomeFala, botao.dataset.tipo);
         falar(texto, botao, profissionalSelecionada.nome);
       });
     });

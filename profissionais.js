@@ -4,6 +4,11 @@
 // Para adicionar: copie uma linha e troque nome e função.
 // Para remover: apague a linha inteira.
 // As funções do filtro são geradas automaticamente a partir daqui.
+//
+// Campo opcional "falar": como a voz deve PRONUNCIAR o nome.
+//   Use quando o nome escrito sai estranho na voz. O nome real continua
+//   aparecendo na tela; só a fala muda. Ex.:
+//     { nome: "Sibelly", funcao: "Manicure", falar: "Cibele" },
 // =====================================================================
 const PROFISSIONAIS = [
   { nome: "Nádia",             funcao: "Cabeleireira" },
@@ -22,7 +27,7 @@ const PROFISSIONAIS = [
   { nome: "Paula Gomes",       funcao: "Manicure" },
   { nome: "Leonara",           funcao: "Manicure" },
   { nome: "Claudia",           funcao: "Manicure" },
-  { nome: "Sibelly",           funcao: "Manicure" },
+  { nome: "Sibelly",           funcao: "Manicure", falar: "Cibele" },
   { nome: "Hilzilane",         funcao: "Manicure" },
   { nome: "Marilia",           funcao: "Manicure" },
   { nome: "Juliana Melo",      funcao: "Manicure" },
@@ -31,4 +36,7 @@ const PROFISSIONAIS = [
   { nome: "Daiana",            funcao: "Manicure" },
   { nome: "Juliana Rodrigues", funcao: "Manicure" },
   { nome: "Gabriela Johanna",  funcao: "Manicure" },
+  { nome: "Milena",            funcao: "Recepcionista" },
+  { nome: "Maria das Luz",     funcao: "Recepcionista" },
+  { nome: "Thamires",          funcao: "Recepcionista" },
 ];
