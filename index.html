@@ -737,13 +737,28 @@
        ============================================================ */
     const suporteVoz = "speechSynthesis" in window;
 
+    // Nomes de vozes femininas (pt) comuns em Windows/Chrome/Edge/macOS/Android.
+    const VOZ_FEMININA = /maria|heloi|francisca|thalita|giovanna|brenda|manuela|fernanda|luciana|joana|yara|cl[aá]ra|google portug/i;
+    // Vozes reconhecidamente masculinas, para evitar.
+    const VOZ_MASCULINA = /daniel|felipe|ant[oô]nio|donato|j[uú]lio|ricardo|joaquim|fabio|fábio/i;
+
     function escolherVoz() {
       if (!suporteVoz) return;
       const vozes = window.speechSynthesis.getVoices();
-      vozPtBr =
-        vozes.find((v) => /^pt[-_]?br/i.test(v.lang)) ||
-        vozes.find((v) => /^pt/i.test(v.lang)) ||
-        null;
+      const pt = vozes.filter((v) => /^pt/i.test(v.lang));
+      if (!pt.length) {
+        vozPtBr = null;
+        return;
+      }
+      // Dentro de cada grupo, prefere pt-BR antes de pt-PT.
+      const ehBr = (v) => /^pt[-_]?br/i.test(v.lang);
+      const prefBr = (lista) => lista.slice().sort((a, b) => (ehBr(b) ? 1 : 0) - (ehBr(a) ? 1 : 0));
+
+      const femininas = prefBr(pt.filter((v) => VOZ_FEMININA.test(v.name)));
+      const naoMasculinas = prefBr(pt.filter((v) => !VOZ_MASCULINA.test(v.name)));
+
+      // 1º voz feminina conhecida; 2º qualquer não-masculina; 3º qualquer pt.
+      vozPtBr = femininas[0] || naoMasculinas[0] || prefBr(pt)[0] || null;
     }
 
     if (suporteVoz) {
