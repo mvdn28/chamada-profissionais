@@ -237,6 +237,54 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* ---------- Seletor de voz ---------- */
+    .voz {
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+      flex-wrap: wrap;
+      margin-top: var(--s3);
+      padding: 0 var(--s2);
+    }
+    .voz[hidden] { display: none; }
+    .voz-rotulo {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--texto-fraco);
+      flex-shrink: 0;
+    }
+    .voz-opcoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s2);
+    }
+    .voz-chip {
+      border: 1px solid var(--grafite-3);
+      background: transparent;
+      color: var(--texto-suave);
+      padding: 0 var(--s3);
+      height: 34px;
+      border-radius: var(--r-full);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .voz-chip:hover { border-color: var(--bronze-claro); color: var(--bege); }
+    .voz-chip.ativo {
+      background: var(--bronze);
+      border-color: var(--bronze);
+      color: var(--preto);
+      font-weight: 600;
+    }
+    .voz-chip .g { font-size: 0.9em; opacity: 0.8; }
+    .voz-chip.ativo .g { opacity: 1; }
+
     /* ---------- Seções ---------- */
     .secao-titulo {
       font-family: var(--fonte-corpo);
@@ -632,6 +680,12 @@
         <input id="volume" type="range" min="0" max="100" step="5" value="95" />
         <span class="valor" id="volume-valor">95%</span>
       </div>
+
+      <!-- Seletor de voz (gerado a partir das vozes instaladas no aparelho) -->
+      <div class="voz" id="voz-bloco" hidden>
+        <span class="voz-rotulo">Voz:</span>
+        <div class="voz-opcoes" id="voz-opcoes" role="group" aria-label="Escolher voz"></div>
+      </div>
     </div>
   </div>
 
@@ -715,7 +769,10 @@
     let termoBusca = "";
     let profissionalSelecionada = null;
     let elementoFoco = null; // para devolver o foco ao fechar o modal
-    let vozPtBr = null;
+    let vozesPt = [];        // vozes pt disponíveis no aparelho
+    let vozAtual = null;     // voz escolhida para falar
+    let vozEscolhidaNome = null; // nome da voz selecionada manualmente (lembrada)
+    try { vozEscolhidaNome = localStorage.getItem("vozEscolhida"); } catch (e) {}
 
     /* ---- Elementos ---- */
     const elFiltros = document.getElementById("filtros");
@@ -730,6 +787,8 @@
     const elAvisoVoz = document.getElementById("aviso-voz");
     const elBtnFechar = document.getElementById("btn-fechar");
     const elStatusVoz = document.getElementById("status-voz");
+    const elVozBloco = document.getElementById("voz-bloco");
+    const elVozOpcoes = document.getElementById("voz-opcoes");
     const botoesMensagem = Array.from(document.querySelectorAll(".btn-mensagem"));
 
     /* ============================================================
@@ -742,28 +801,91 @@
     // Vozes reconhecidamente masculinas, para evitar.
     const VOZ_MASCULINA = /daniel|felipe|ant[oô]nio|donato|j[uú]lio|ricardo|joaquim|fabio|fábio/i;
 
-    function escolherVoz() {
-      if (!suporteVoz) return;
-      const vozes = window.speechSynthesis.getVoices();
-      const pt = vozes.filter((v) => /^pt/i.test(v.lang));
-      if (!pt.length) {
-        vozPtBr = null;
+    const ehBr = (v) => /^pt[-_]?br/i.test(v.lang);
+
+    // Rótulo curto e amigável a partir do nome técnico da voz.
+    function rotuloVoz(v) {
+      if (/google/i.test(v.name)) return "Google";
+      let n = v.name.replace(/^Microsoft\s+/i, "").split(" - ")[0];
+      n = n.replace(/\b(Online|\(Natural\)|Natural|Desktop|Mobile)\b/gi, "").trim();
+      return n || v.name;
+    }
+
+    // Símbolo de gênero estimado pelo nome da voz (apenas dica visual).
+    function generoVoz(v) {
+      if (VOZ_MASCULINA.test(v.name)) return "♂";
+      if (VOZ_FEMININA.test(v.name)) return "♀";
+      return "";
+    }
+
+    // Voz padrão: a masculina (pedido), senão pt-BR, senão a primeira.
+    function vozPadrao(lista) {
+      return (
+        lista.find((v) => VOZ_MASCULINA.test(v.name)) ||
+        lista.find(ehBr) ||
+        lista[0] ||
+        null
+      );
+    }
+
+    function definirVozAtual() {
+      let escolhida = null;
+      if (vozEscolhidaNome) {
+        escolhida = vozesPt.find((v) => v.name === vozEscolhidaNome) || null;
+      }
+      vozAtual = escolhida || vozPadrao(vozesPt);
+    }
+
+    function renderVozes() {
+      elVozOpcoes.innerHTML = "";
+      if (!vozesPt.length) {
+        elVozBloco.hidden = true;
         return;
       }
-      // Dentro de cada grupo, prefere pt-BR antes de pt-PT.
-      const ehBr = (v) => /^pt[-_]?br/i.test(v.lang);
-      const prefBr = (lista) => lista.slice().sort((a, b) => (ehBr(b) ? 1 : 0) - (ehBr(a) ? 1 : 0));
+      elVozBloco.hidden = false;
+      vozesPt.forEach((v) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "voz-chip" + (vozAtual && v.name === vozAtual.name ? " ativo" : "");
+        btn.title = v.name;
+        const g = generoVoz(v);
 
-      const femininas = prefBr(pt.filter((v) => VOZ_FEMININA.test(v.name)));
-      const naoMasculinas = prefBr(pt.filter((v) => !VOZ_MASCULINA.test(v.name)));
+        const txt = document.createElement("span");
+        txt.textContent = rotuloVoz(v);
+        btn.appendChild(txt);
+        if (g) {
+          const gs = document.createElement("span");
+          gs.className = "g";
+          gs.setAttribute("aria-hidden", "true");
+          gs.textContent = g;
+          btn.appendChild(gs);
+        }
 
-      // 1º voz feminina conhecida; 2º qualquer não-masculina; 3º qualquer pt.
-      vozPtBr = femininas[0] || naoMasculinas[0] || prefBr(pt)[0] || null;
+        btn.addEventListener("click", () => {
+          vozEscolhidaNome = v.name;
+          try { localStorage.setItem("vozEscolhida", v.name); } catch (e) {}
+          vozAtual = v;
+          renderVozes();
+        });
+        elVozOpcoes.appendChild(btn);
+      });
+    }
+
+    // Carrega as vozes (carregam de forma assíncrona) e atualiza o seletor.
+    function carregarVozes() {
+      if (!suporteVoz) return;
+      const todas = window.speechSynthesis.getVoices();
+      // pt-BR primeiro, depois outras pt.
+      vozesPt = todas
+        .filter((v) => /^pt/i.test(v.lang))
+        .sort((a, b) => (ehBr(b) ? 1 : 0) - (ehBr(a) ? 1 : 0));
+      definirVozAtual();
+      renderVozes();
     }
 
     if (suporteVoz) {
-      escolherVoz();
-      window.speechSynthesis.onvoiceschanged = escolherVoz;
+      carregarVozes();
+      window.speechSynthesis.onvoiceschanged = carregarVozes;
     }
 
     function montarTexto(nome, tipo) {
@@ -813,7 +935,7 @@
     function aquecerAudio() {
       const aquece = new SpeechSynthesisUtterance(".");
       aquece.lang = "pt-BR";
-      if (vozPtBr) aquece.voice = vozPtBr;
+      if (vozAtual) aquece.voice = vozAtual;
       aquece.volume = 0.01; // praticamente inaudível
       aquece.rate = 1;
       window.speechSynthesis.speak(aquece);
@@ -841,7 +963,7 @@
       const criarFala = (aoTerminar) => {
         const u = new SpeechSynthesisUtterance(texto);
         u.lang = "pt-BR"; // fallback caso não exista voz pt-BR explícita
-        if (vozPtBr) u.voice = vozPtBr;
+        if (vozAtual) u.voice = vozAtual;
         u.rate = PARAMS_VOZ.rate;
         u.pitch = PARAMS_VOZ.pitch;
         u.volume = PARAMS_VOZ.volume;

@@ -97,11 +97,15 @@ O áudio sai do **aparelho que dispara** o chamado:
 
 ## 5. Observação sobre a voz
 
-É a **voz sintética do sistema operacional** (no Windows, geralmente a voz "Maria" em
-português). É adequada para avisos no ambiente, mas **não é uma locução profissional**.
+É a **voz sintética do sistema operacional** (no Windows há vozes em português como
+"Daniel" (masculina) e "Maria" (feminina)). É adequada para avisos no ambiente, mas
+**não é uma locução profissional**.
 
-A página tenta usar uma voz com idioma `pt-BR`; se nenhuma existir, usa a voz padrão
-com o idioma definido como `pt-BR`.
+No topo da página, ao lado do volume, há um **seletor de voz** com botões para cada voz
+em português instalada no aparelho (♂ masculina, ♀ feminina). A voz **masculina é o
+padrão**; basta tocar em outro botão para trocar, e a escolha fica lembrada no navegador.
+As vozes disponíveis dependem do que está instalado no PC/celular — para adicionar mais
+no Windows: **Configurações → Hora e idioma → Fala**.
 
 ---
 
